@@ -17,8 +17,7 @@ systemctl status xmrig
 Create a `.env` file to store your wallet address
 ```
 # cat .env
-```
-```
+
 WALLET="YOUR_WALLET_ADDRESS"
 ```
 

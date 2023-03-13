@@ -1,24 +1,40 @@
 #!/bin/bash
 
-VERSION="6.19.0"
-POOL="xmr-us-east1.nanopool.org:14444"
-
 if [ `id -u` -ne 0 ]
 	then echo Please run this script as root
 	exit
 fi
 
-source .env
+source xmrig.conf
 
 mkdir -p /opt
-wget https://github.com/xmrig/xmrig/releases/download/v$VERSION/xmrig-$VERSION-linux-x64.tar.gz -O /tmp/xmrig-$VERSION-linux-x64.tar.gz
-tar -xf /tmp/xmrig-$VERSION-linux-x64.tar.gz -C /opt
-
-sed -i "s/donate.v2.xmrig.com:3333/$POOL/" /opt/xmrig-$VERSION/config.json
-sed -i "s/YOUR_WALLET_ADDRESS/$WALLET/" /opt/xmrig-$VERSION/config.json
-sed -i "s/\"coin\": null/\"coin\": \"monero\"/" /opt/xmrig-$VERSION/config.json
-sed -i "s/\"syslog\": false/\"syslog\": true/" /opt/xmrig-$VERSION/config.json
-sed -i "s/\"log-file\": null/\"log-file\": \"\/opt\/xmrig-$VERSION\/xmrig.log\"/" /opt/xmrig-$VERSION/config.json
-echo -e "[Unit]\nDescription=XMRig miner service\nAfter=network.target\n\n[Service]\nExecStart=/opt/xmrig-$VERSION/xmrig --config /opt/xmrig-$VERSION/config.json\nType=simple\n\n[Install]\nWantedBy=multi-user.target\n" > /etc/systemd/system/xmrig.service
+wget $(curl -s https://api.github.com/repos/xmrig/xmrig/releases/latest | grep browser_download_url | grep -oE "https://github.com/.*linux-x64.tar.gz") -O /tmp/xmrig-linux-x64.tar.gz
+tar -xf /tmp/xmrig-linux-x64.tar.gz -C /opt
+INSTALL_PATH=$(ls -d /opt/xmrig-*/)
+INSTALL_PATH=${INSTALL_PATH:0:-1}
+echo """\
+{
+    \"http\": {
+        \"enabled\": $HTTP_ENABLED,
+        \"host\": \"$HTTP_BIND\",
+        \"port\": $HTTP_PORT,
+        \"access-token\": \"$HTTP_ACCESS_TOKEN\",
+        \"restricted\": $HTTP_RESTRICTED
+    },
+    \"autosave\": true,
+    \"cpu\": true,
+    \"opencl\": false,
+    \"cuda\": false,
+    \"pools\": [
+        {
+            \"coin\": \"monero\",
+            \"url\": \"$POOL\",
+            \"user\": \"$WALLET\",
+            \"tls\": true
+        }
+    ]
+}\
+""" > $INSTALL_PATH/config.json
+echo -e "[Unit]\nDescription=XMRig miner service\nAfter=network.target\n\n[Service]\nExecStart=$INSTALL_PATH/xmrig --config $INSTALL_PATH/config.json\nType=simple\n\n[Install]\nWantedBy=multi-user.target\n" > /etc/systemd/system/xmrig.service
 systemctl daemon-reload
 systemctl enable --now xmrig

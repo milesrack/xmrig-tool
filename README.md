@@ -1,5 +1,5 @@
 # XMRig Tool
-Run XMRig miner as a systemd service
+A systemd service for the XMRig miner.
 
 ## Installation
 ```

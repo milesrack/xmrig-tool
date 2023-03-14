@@ -11,7 +11,7 @@ cd xmrig-tool
 Create an `xmrig.conf` file with the following variables:
 ```
 HTTP_ENABLED="true"
-HTTP_BIND="127.0.0.1"
+HTTP_BIND="0.0.0.0"
 HTTP_PORT="7000"
 HTTP_ACCESS_TOKEN=""
 HTTP_RESTRICTED="false"

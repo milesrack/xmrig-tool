@@ -12,6 +12,7 @@ wget $(curl -s https://api.github.com/repos/xmrig/xmrig/releases/latest | grep b
 tar -xf /tmp/xmrig-linux-x64.tar.gz -C /opt
 INSTALL_PATH=$(ls -d /opt/xmrig-*/)
 INSTALL_PATH=${INSTALL_PATH:0:-1}
+CPU=$(seq -s ', ' 0 $(( `cat /proc/cpuinfo | grep processor | wc -l`-1 )))
 echo """\
 {
     \"http\": {
@@ -22,7 +23,10 @@ echo """\
         \"restricted\": $HTTP_RESTRICTED
     },
     \"autosave\": true,
-    \"cpu\": true,
+    \"cpu\": {
+        \"enabled\": true,
+        \"rx\": [$CPU]
+    },
     \"opencl\": false,
     \"cuda\": false,
     \"pools\": [

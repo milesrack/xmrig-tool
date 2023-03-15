@@ -24,8 +24,7 @@ echo """\
     },
     \"autosave\": true,
     \"cpu\": {
-        \"enabled\": true,
-        \"rx\": [$CPU]
+        \"enabled\": true
     },
     \"opencl\": false,
     \"cuda\": false,
